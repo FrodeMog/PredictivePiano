@@ -1,17 +1,38 @@
 import gradio as gr
-import argparse
-import PianoInput
+import asyncio
+import threading
+from PianoInput import PianoInput
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--name", type=str, default="User")
-args, unknown = parser.parse_known_args()
+piano_input = PianoInput()
+notes = []
 
-with gr.Blocks() as demo:
-    gr.Markdown(f"# Greetings {args.name}!")
-    inp = gr.Textbox()
-    out = gr.Textbox()
+def handle_message(message):
+    if message.type == "note_on":
+        notes.append(message.note)
+        print("note: " + str(message.note))
 
-    inp.change(fn=lambda x: x, inputs=inp, outputs=out)
+def note(input_text):
+    if notes:
+        return "notes: " + ', '.join(map(str, notes))
+    else:
+        return "No notes received yet."
 
-if __name__ == "__main__":
-    demo.launch()
+iface = gr.Interface(
+    fn=note,
+    inputs="text",
+    outputs=gr.Textbox(max_lines=10, autoscroll=True)
+)
+
+def run_midi_input():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(piano_input.get_midi_out(callback=handle_message))
+
+def run_gradio_interface():
+    iface.launch()
+
+midi_thread = threading.Thread(target=run_midi_input)
+gradio_thread = threading.Thread(target=run_gradio_interface)
+
+midi_thread.start()
+gradio_thread.start()
