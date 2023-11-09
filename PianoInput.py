@@ -7,7 +7,7 @@ class PianoInput:
         print(mido.get_input_names())
         # Set up MIDI input
         try:
-            with mido.open_input('Roland Digital Piano 3', callback=note_handler) as port:
+            with mido.open_input('VirtualMidi Extra 2', callback=note_handler) as port:
                 print("Using {}".format(port))
                 print('MIDI port opened:', port)
                 while True:

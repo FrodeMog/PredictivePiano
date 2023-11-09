@@ -1,3 +1,4 @@
 pygame
 mido
 python-rtmidi
+gradio
