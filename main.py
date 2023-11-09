@@ -1,8 +1,9 @@
+import asyncio
 from PianoInput import PianoInput
 
-def main():
+async def main():
     piano_input = PianoInput()
-    piano_input.test_function()
+    print(await piano_input.get_midi_out())
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
