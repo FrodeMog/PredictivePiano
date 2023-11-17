@@ -17,7 +17,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
 loaded_model = ConvNet()
-loaded_model.load_state_dict(torch.load("cnnExample.ckpt"))
+loaded_model.load_state_dict(torch.load(".trained_model/cnnExample.pth"))
 loaded_model.to(device)
 loaded_model.eval()
 
