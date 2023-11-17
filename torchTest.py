@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 # Print found devices
 devices = [d for d in range(torch.cuda.device_count())] 
@@ -9,7 +10,7 @@ print(device_names)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
-"""
+""" simple test example
 x = torch.empty(1).to(device)
 print("empty(1): ", x)
 
@@ -28,6 +29,7 @@ print("x size: ", x.size())
 print("x Shape: ", x.shape)
 """
 
+""" 
 #linear regression example
 
 X = torch.tensor([1, 2, 3, 4, 5, 6, 7, 8 ], dtype=torch.float32, device = device)
@@ -72,3 +74,59 @@ for epoch in range(n_epochs):
         print(f"epoch {epoch+1}: w = {W:.3f}, loss = {l:.8f}")
 
 print(f"Prediction after training: f({X_test}) = {forward(X_test).item():.3f}")
+"""
+""
+#Linear regression example with nn.Module
+X = torch.tensor([[1], [2], [3], [4], [5], [6], [7], [8 ]], dtype=torch.float32, device = device)
+Y = torch.tensor([[2], [4], [6], [8], [10], [12], [14], [16]], dtype=torch.float32, device = device)
+
+n_samples, n_features = X.shape
+print(f'n_samples = {n_samples}, n_features = {n_features}')
+
+# 0) create a test sample
+X_test = torch.tensor([5], dtype=torch.float32, device = device)
+
+# 1) create a model
+class linearRegression(nn.Module):
+
+    def __init__(self, input_dim, output_dim):
+        super(linearRegression, self).__init__()
+        #define layers
+        self.lin = nn.Linear(input_dim, output_dim)
+
+    def forward(self, x):
+        return self.lin(x)
+    
+input_size, output_size = n_features, n_features
+model = linearRegression(input_size, output_size).to(device)
+print(f'Prediction before training: f({X_test.item()}) = {model(X_test).item():.3f}')
+
+# 2)) loss and optimizer
+learning_rate = 0.01
+n_epochs = 100
+
+loss = nn.MSELoss()
+optimzier = torch.optim.SGD(model.parameters(), lr=learning_rate)
+
+# 3) training loop
+for epoch in range(n_epochs):
+    #prediction = forward pass
+    y_pred = model(X)
+
+    #loss
+    l = loss(Y, y_pred)
+
+    #calculate gradients = backward pass
+    l.backward() #dl/dw
+
+    #update weights
+    optimzier.step()
+
+    #zero gradients
+    optimzier.zero_grad()
+
+    if (epoch + 1) % 10 == 0:
+        w, b = model.parameters()
+        print(f"epoch {epoch+1}: w = {w[0][0].item():.3f}, loss = {l:.8f}")
+
+print(f"Prediction after training: f({X_test.item()}) = {model(X_test).item():.3f}")
