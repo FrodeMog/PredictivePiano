@@ -13,3 +13,5 @@ print("empty(3): ", x)
 
 x = torch.empty(2, 3)
 print("empty(2, 3): ", x)
+print("x Size: ", x.size())
+print("x Shape: ", x.shape)
