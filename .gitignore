@@ -1,5 +1,6 @@
 __pycache__/
 *.cpython-311
 flagged/log.csv
-data/
+data/**
 .trained_model/
+midi_files/**
