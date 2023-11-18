@@ -46,14 +46,20 @@ class MidiDataHandler:
         except Exception as e:
             print(f"Error getting time signature from MIDI file {file_path}: {e}")
 
-    def get_notes_from_index(self, file_path, start_index, num_notes=5):
+    def get_notes_from_index(self, file_path, start_index, num_notes=5, channel_number=1):
         """
         Returns a list of num_notes notes starting from the specified index in the MIDI file
+        The channel_number parameter specifies which channel's notes you want to get.
+        Typically, channel 1 is for the right hand and channel 2 is for the left hand.
         """
         try:
             mid = mido.MidiFile(file_path)
+
+            if channel_number >= len(mid.tracks):
+                raise ValueError("Invalid channel number")
+
             notes = []
-            for msg in mid:
+            for msg in mid.tracks[channel_number]:
                 if msg.type == 'note_on':
                     notes.append(msg.note)
 
@@ -66,45 +72,69 @@ class MidiDataHandler:
         except Exception as e:
             print(f"Error getting notes from MIDI file {file_path}: {e}")
 
-    def get_notes_from_random(self, file_path, num_notes=5):
+    def get_notes_from_random(self, file_path, num_notes=5, channel_number=1):
         """
-        Returns a list of num_notes notes starting from a random index in the MIDI file
+        Returns a list of num_notes notes starting from a random index in the MIDI file.
+        The channel_number parameter specifies which channel's notes you want to get.
+        Typically, channel 1 is for the right hand and channel 2 is for the left hand.
         """
-        # Get the total number of notes in the MIDI file
-        total_notes = len([msg.note for msg in mido.MidiFile(file_path) if msg.type == 'note_on'])
+        try:
+            mid = mido.MidiFile(file_path)
+            if channel_number >= len(mid.tracks):
+                raise ValueError("Invalid channel number")
 
-        # Ensure there are enough notes to select from
-        if total_notes <= num_notes:
-            raise ValueError("Not enough notes in the MIDI file to select from")
+            # Get the total number of notes in the specified channel
+            total_notes = len([msg.note for msg in mid.tracks[channel_number] if msg.type == 'note_on'])
 
-        # Select a random start index from the first note to the last possible start note
-        start_index = random.randint(0, total_notes - num_notes)
+            # Ensure there are enough notes to select from
+            if total_notes <= num_notes:
+                raise ValueError("Not enough notes in the MIDI file to select from")
 
-        return self.get_notes_from_index(file_path, start_index, num_notes)
+            # Select a random start index from the first note to the last possible start note
+            start_index = random.randint(0, total_notes - num_notes)
+
+            return self.get_notes_from_index(file_path, start_index, num_notes, channel_number)
+
+        except Exception as e:
+            print(f"Error getting notes from MIDI file {file_path}: {e}")
     
-    def get_pair_of_notes_from_random(self, file_path, num_notes=5):
+    def get_pair_of_notes_from_random(self, file_path, num_notes=5, channel_number=1):
         """
-        Returns a pair of arrays of num_notes notes starting from a random index in the MIDI file
+        Returns a pair of arrays of num_notes notes starting from a random index in the MIDI file.
+        The channel_number parameter specifies which channel's notes you want to get.
+        Typically, channel 1 is for the right hand and channel 2 is for the left hand.
         """
-        # Get the total number of notes in the MIDI file
-        total_notes = len([msg.note for msg in mido.MidiFile(file_path) if msg.type == 'note_on'])
+        mid = mido.MidiFile(file_path)
+        if len(mid.tracks) != 3:
+            raise ValueError("Invalid number of tracks in the MIDI file")
+
+        if channel_number >= len(mid.tracks):
+            raise ValueError("Invalid channel number")
+
+        # Get the total number of notes in the specified channel
+        total_notes = len([msg.note for msg in mid.tracks[channel_number] if msg.type == 'note_on'])
 
         # Ensure there are enough notes to select from
         if total_notes <= 2 * num_notes:
             raise ValueError("Not enough notes in the MIDI file to select from")
 
-        # Select a random start index from the first note to the last possible start note for the pair of arrays
-        start_index = random.randint(0, total_notes - 2 * num_notes)
+        # Calculate the maximum possible start index for the pair of arrays
+        max_start_index = total_notes - 2 * num_notes
 
-        return (self.get_notes_from_index(file_path, start_index, num_notes),
-                self.get_notes_from_index(file_path, start_index + num_notes, num_notes))
+        # Select a random start index within the bounds
+        start_index = random.randint(0, max_start_index)
+
+        return (self.get_notes_from_index(file_path, start_index, num_notes, channel_number),
+                self.get_notes_from_index(file_path, start_index + num_notes, num_notes, channel_number))
     
-    def dataset_pair(self, file_path, num_notes=5):
+    def dataset_pair(self, file_path, channel_number, num_notes=5):
         """
-        Returns a 2D array representing an 88-key piano, where each value is True if the corresponding key is in the array and False otherwise
+        Returns a 2D array representing an 88-key piano, where each value is True if the corresponding key is in the array and False otherwise.
+        The channel_number parameter specifies which channel's notes you want to get.
+        Typically, channel 1 is for the right hand and channel 2 is for the left hand.
         """
         # Get a pair of arrays of notes from a random index in the MIDI file
-        pair_of_notes = self.get_pair_of_notes_from_random(file_path, num_notes)
+        pair_of_notes = self.get_pair_of_notes_from_random(file_path, num_notes, channel_number)
 
         # Initialize a 2D array representing an 88-key piano with all values set to False
         piano_keys = [[False for _ in range(88)] for _ in range(2)]
@@ -134,5 +164,3 @@ class MidiDataHandler:
         Converts a list of MIDI note numbers to their corresponding piano key names
         """
         return [self.midi_note_to_piano(note) for note in midi_notes]
-    
-    

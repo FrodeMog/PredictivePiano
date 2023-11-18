@@ -13,9 +13,12 @@ midi_folder_path = "midi_files/piano"
 
 
 # Set the number of random files to process
-num_files = 3
+num_files = 220
+num_sequences_per_file = 10
 
-# Loop through random files
+# Initialize an empty DataFrame
+data = pd.DataFrame()
+
 for _ in range(num_files):
     # Set the file path
     file_name = random.choice(os.listdir(midi_folder_path))
@@ -25,25 +28,52 @@ for _ in range(num_files):
     result = handler.read_midi_file(file_path)
 
     print("\nfilename:", file_name)
-    #print("midi file:", file_path)
-    #print("Tempo:", handler.get_tempo(file_path))
-    #print("Time signature:", handler.get_time_signature(file_path))
-    #print("0 Index notes: ", handler.midi_notes_to_piano(handler.get_notes_from_index(file_path, 0, 5)))
-    #print("Random index notes: ", handler.midi_notes_to_piano(handler.get_notes_from_random(file_path, 5)))
-    for _ in range(5):
-        pairOfNote = handler.get_pair_of_notes_from_random(file_path, 5)
+
+    for _ in range(num_sequences_per_file):
+        try:
+            pairOfNote = handler.get_pair_of_notes_from_random(file_path, 5, 1)
+        except ValueError as e:
+            print("Error:", e)
+            break
         print("Random note pairs as midi\n", 
             "first note sequence:\t",pairOfNote[0], 
             "\n second note sequence:\t", pairOfNote[1])
-        t = torch.tensor(pairOfNote)
-        t_np = t.numpy()
-        df = pd.DataFrame(t_np)
         
-        # Check if the file exists
-        file_exists = os.path.isfile("test.csv")
+        # Convert the pair of notes to a DataFrame
+        df = pd.DataFrame({
+            'feature': [pairOfNote[0]],
+            'label': [pairOfNote[1]]
+        })
         
-        # Write to the file, appending if it already exists and not writing the header if it already exists
-        with open("test.csv", 'a') as f:
-            df.to_csv(f, header=not file_exists, index=False)
-        #print("Random Pair notes as piano keys: ", handler.midi_notes_to_piano(pairOfNote[0]), handler.midi_notes_to_piano(pairOfNote[1]))
-    #print("Dataset pair notes: ", handler.dataset_pair(file_path, 5))
+        # Append the DataFrame to the data
+        data = pd.concat([data, df], ignore_index=True)
+
+# Save the data to a CSV file
+data.to_csv("test.csv", index=False)
+
+#TODO
+
+#fix note overflow:
+
+#filename: command_melody_lozww_piano.mid
+#Traceback (most recent call last):
+#  File "C:\Users\Frode\Programming-project\PredictivePiano\test_midiDataHandler.py", line 33, in <module>
+#    pairOfNote = handler.get_pair_of_notes_from_random(file_path, 5)
+#                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#  File "C:\Users\Frode\Programming-project\PredictivePiano\midiDataHandler.py", line 94, in get_pair_of_notes_from_random
+#    raise ValueError("Not enough notes in the MIDI file to select from")
+#ValueError: Not enough notes in the MIDI file to select from
+
+#implement track 1 and track 2. (right and left hand)
+#fix dataset and remove .midi files that arent pure piano
+
+
+
+#print("midi file:", file_path)
+#print("Tempo:", handler.get_tempo(file_path))
+#print("Time signature:", handler.get_time_signature(file_path))
+#print("0 Index notes: ", handler.midi_notes_to_piano(handler.get_notes_from_index(file_path, 0, 5)))
+#print("Random index notes: ", handler.midi_notes_to_piano(handler.get_notes_from_random(file_path, 5)))
+# Create an empty DataFrame to store the features and labels
+#print("Random Pair notes as piano keys: ", handler.midi_notes_to_piano(pairOfNote[0]), handler.midi_notes_to_piano(pairOfNote[1]))
+#print("Dataset pair notes: ", handler.dataset_pair(file_path, 5))
