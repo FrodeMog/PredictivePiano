@@ -81,6 +81,42 @@ class MidiDataHandler:
         start_index = random.randint(0, total_notes - num_notes)
 
         return self.get_notes_from_index(file_path, start_index, num_notes)
+    
+    def get_pair_of_notes_from_random(self, file_path, num_notes=5):
+        """
+        Returns a pair of arrays of num_notes notes starting from a random index in the MIDI file
+        """
+        # Get the total number of notes in the MIDI file
+        total_notes = len([msg.note for msg in mido.MidiFile(file_path) if msg.type == 'note_on'])
+
+        # Ensure there are enough notes to select from
+        if total_notes <= 2 * num_notes:
+            raise ValueError("Not enough notes in the MIDI file to select from")
+
+        # Select a random start index from the first note to the last possible start note for the pair of arrays
+        start_index = random.randint(0, total_notes - 2 * num_notes)
+
+        return (self.get_notes_from_index(file_path, start_index, num_notes),
+                self.get_notes_from_index(file_path, start_index + num_notes, num_notes))
+    
+    def dataset_pair(self, file_path, num_notes=5):
+        """
+        Returns a 2D array representing an 88-key piano, where each value is True if the corresponding key is in the array and False otherwise
+        """
+        # Get a pair of arrays of notes from a random index in the MIDI file
+        pair_of_notes = self.get_pair_of_notes_from_random(file_path, num_notes)
+
+        # Initialize a 2D array representing an 88-key piano with all values set to False
+        piano_keys = [[False for _ in range(88)] for _ in range(2)]
+
+        # Set the value to True for each key in the pair of arrays
+        for i in range(2):
+            for note in pair_of_notes[i]:
+                # Ensure the note is within the range of an 88-key piano
+                if 21 <= note <= 108:
+                    piano_keys[i][note - 21] = True
+
+        return piano_keys
 
     #Converts a midi note to its corresponding piano key name
     def midi_note_to_piano(self, midi_note):
