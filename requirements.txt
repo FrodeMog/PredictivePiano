@@ -2,3 +2,5 @@ mido
 python-rtmidi
 gradio
 torch
+sklearn
+scikit-learn
