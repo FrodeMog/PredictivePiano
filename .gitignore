@@ -4,3 +4,4 @@ flagged/log.csv
 data/**
 .trained_model/**
 midi_files/**
+test.csv

@@ -1,6 +1,9 @@
 import os
 from midiDataHandler import MidiDataHandler
 import random
+import torch as torch
+import numpy as np
+import pandas as pd
 
 # Create an instance of the MidiDataHandler class
 handler = MidiDataHandler()
@@ -29,6 +32,18 @@ for _ in range(num_files):
     #print("Random index notes: ", handler.midi_notes_to_piano(handler.get_notes_from_random(file_path, 5)))
     for _ in range(5):
         pairOfNote = handler.get_pair_of_notes_from_random(file_path, 5)
-        print("Random Pair notes as midi notes: ", pairOfNote[0], pairOfNote[1])
-        print("Random Pair notes as piano keys: ", handler.midi_notes_to_piano(pairOfNote[0]), handler.midi_notes_to_piano(pairOfNote[1]))
+        print("Random note pairs as midi\n", 
+            "first note sequence:\t",pairOfNote[0], 
+            "\n second note sequence:\t", pairOfNote[1])
+        t = torch.tensor(pairOfNote)
+        t_np = t.numpy()
+        df = pd.DataFrame(t_np)
+        
+        # Check if the file exists
+        file_exists = os.path.isfile("test.csv")
+        
+        # Write to the file, appending if it already exists and not writing the header if it already exists
+        with open("test.csv", 'a') as f:
+            df.to_csv(f, header=not file_exists, index=False)
+        #print("Random Pair notes as piano keys: ", handler.midi_notes_to_piano(pairOfNote[0]), handler.midi_notes_to_piano(pairOfNote[1]))
     #print("Dataset pair notes: ", handler.dataset_pair(file_path, 5))
