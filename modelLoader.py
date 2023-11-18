@@ -23,8 +23,8 @@ loaded_model.eval()
 
 with torch.no_grad():
     n_correct = 0
-    n_samples = 0
-    n_class_correct = len(test_loader.dataset)
+    n_class_correct = 0
+    n_samples = len(test_loader.dataset)
 
     for images, labels in test_loader:
         images = images.to(device)

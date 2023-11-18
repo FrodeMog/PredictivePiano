@@ -2,3 +2,4 @@ __pycache__/
 *.cpython-311
 flagged/log.csv
 data/
+.trained_model/
