@@ -82,7 +82,7 @@ class MidiDataHandler:
 
         return self.get_notes_from_index(file_path, start_index, num_notes)
 
-
+    #Converts a midi note to its corresponding piano key name
     def midi_note_to_piano(self, midi_note):
         """
         Converts a MIDI note number to its corresponding piano key name
@@ -92,6 +92,7 @@ class MidiDataHandler:
         note = notes[midi_note % 12]
         return note + str(octave)
     
+    #Converts a list of midi notes to their corresponding piano key names
     def midi_notes_to_piano(self, midi_notes):
         """
         Converts a list of MIDI note numbers to their corresponding piano key names
