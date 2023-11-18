@@ -1,7 +1,6 @@
 import pandas as pd
 import torch
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from torch import nn
 from LSTM import LSTM
 
@@ -22,9 +21,6 @@ data = pd.read_csv('test.csv')
 data['feature'] = data['feature'].apply(eval)
 data['label'] = data['label'].apply(eval)
 
-# Scale the data to the range [0, 1]
-scaler = MinMaxScaler()
-
 # Convert the features and labels to PyTorch tensors
 feature_tensor = torch.tensor((np.array(data['feature'].tolist())), dtype=torch.float32).to(device)
 label_tensor = torch.tensor((np.array(data['label'].tolist())), dtype=torch.float32).to(device)
@@ -39,7 +35,7 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # Number of epochs
-epochs = 10000
+epochs = 100000
 
 # Train the model
 for epoch in range(epochs):

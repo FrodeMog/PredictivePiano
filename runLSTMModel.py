@@ -24,14 +24,14 @@ model = model.to(device)
 model.eval()
 
 # Define the input array
-input_data = np.array([69, 60, 65, 64, 69])
+input_data = np.array([80, 71, 80, 56, 68])
 
 # Initialize an empty list to store the outputs
 outputs = []
 outputs = input_data.copy()
 
 # Process the input and append the output to the list
-for _ in range(15):
+for _ in range(20):
     print("input: ", input_data)
     
     # Convert the input to a PyTorch tensor and reshape it
@@ -69,10 +69,10 @@ for note in outputs:
     note = int(note)
 
     # Add a note_on message to the track
-    track.append(mido.Message('note_on', note=note, velocity=64, time=120))
+    track.append(mido.Message('note_on', note=note, velocity=64, time=20))
 
     # Add a note_off message to the track
-    track.append(mido.Message('note_off', note=note, velocity=64, time=200))
+    track.append(mido.Message('note_off', note=note, velocity=64, time=60))
 
 # Save the MIDI file
 mid.save('output.mid')
