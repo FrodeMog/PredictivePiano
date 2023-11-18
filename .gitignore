@@ -5,3 +5,4 @@ data/**
 .trained_model/**
 midi_files/**
 test.csv
+output.mid
