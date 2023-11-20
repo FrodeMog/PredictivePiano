@@ -13,8 +13,8 @@ midi_folder_path = "midi_files/piano"
 
 
 # Set the number of random files to process
-num_files = 220
-num_sequences_per_file = 10
+num_files = 240
+num_sequences_per_file = 20
 
 # Initialize an empty DataFrame
 data = pd.DataFrame()
@@ -49,7 +49,7 @@ for _ in range(num_files):
         data = pd.concat([data, df], ignore_index=True)
 
 # Save the data to a CSV file
-data.to_csv("test.csv", index=False)
+data.to_csv("test2.csv", index=False)
 
 #print("midi file:", file_path)
 #print("Tempo:", handler.get_tempo(file_path))
