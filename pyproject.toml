@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "predictive-piano"
+version = "0.1.0"
+description = "Predicts MIDI sequences using a neural network."
+authors = ["Your Name <your-email@example.com>"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = { version = "2.1.1", extras = ["cpuonly"] }
+torchvision = "^0.16.0"
+torchaudio = "^2.1.1"
+mido = "^1.3.0"
+pandas = "^2.1.3"
+matplotlib = "^3.8.2"
+
+[tool.poetry.dev-dependencies]
