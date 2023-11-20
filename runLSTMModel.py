@@ -9,10 +9,10 @@ import mido
 device = "cpu"
 
 # Initialize the model with the same parameters
-model = LSTM(input_size=1, hidden_size=127, output_size=5)
+model = LSTM(input_size=4, hidden_size=127, output_size=4, num_layers=2)
 
 # Load the state dict previously saved
-model.load_state_dict(torch.load('LSTMTest.pth'))
+model.load_state_dict(torch.load('LSTMTest2.pth'))
 
 # Move the model to the device
 model = model.to(device)
@@ -21,7 +21,7 @@ model = model.to(device)
 model.eval()
 
 # Define the input array
-input_data = np.array([80, 71, 80, 56, 68])
+input_data = np.array([[79, 100, 0, 144], [78, 100, 120, 144], [76, 100, 240, 239], [76, 100, 480, 239], [76, 100, 720, 264]])
 
 # Initialize an empty list to store the outputs
 outputs = []
@@ -32,7 +32,7 @@ for _ in range(20):
     print("input: ", input_data)
     
     # Convert the input to a PyTorch tensor and reshape it
-    input_tensor = torch.tensor(input_data, dtype=torch.float32).view(1, len(input_data), 1)
+    input_tensor = torch.tensor(input_data, dtype=torch.float32).view(1, len(input_data), 4)
 
     # Move the input to the same device as the model
     input_tensor = input_tensor.to(device)
@@ -41,8 +41,8 @@ for _ in range(20):
     with torch.no_grad():
         output = model(input_tensor)
 
-    # Convert the output to a numpy array and inverse transform
-    output_np = output.cpu().numpy().flatten()
+    # Convert the output to a numpy array and reshape
+    output_np = output.cpu().numpy().flatten().reshape(-1, 4)
     print("output ", output_np)
 
     # Append the output to the outputs list
@@ -60,16 +60,23 @@ track = mido.MidiTrack()
 # Add the track to the MIDI file
 mid.tracks.append(track)
 
+# Define a scale factor
+scale_factor = 0.05
+
 # For each note in the final output
-for note in outputs:
-    # Ensure note is an integer
-    note = int(note)
+for note_data in outputs:
+    # Extract the note, velocity, on_tick, and duration
+    note, velocity, on_tick, duration = note_data
+
+    # Scale down on_tick and duration
+    on_tick = int(on_tick * scale_factor)
+    duration = int(duration * scale_factor)
 
     # Add a note_on message to the track
-    track.append(mido.Message('note_on', note=note, velocity=64, time=20))
+    track.append(mido.Message('note_on', note=int(note), velocity=int(velocity), time=on_tick))
 
     # Add a note_off message to the track
-    track.append(mido.Message('note_off', note=note, velocity=64, time=60))
+    track.append(mido.Message('note_off', note=int(note), velocity=int(velocity), time=on_tick + duration))
 
 # Save the MIDI file
 mid.save('output.mid')

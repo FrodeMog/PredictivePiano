@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
 # Load the data
-data = pd.read_csv('test.csv')
+data = pd.read_csv('test2.csv')
 
 # Convert the string representation of lists to actual lists
 data['feature'] = data['feature'].apply(eval)
@@ -25,8 +25,9 @@ data['label'] = data['label'].apply(eval)
 feature_tensor = torch.tensor((np.array(data['feature'].tolist())), dtype=torch.float32).to(device)
 label_tensor = torch.tensor((np.array(data['label'].tolist())), dtype=torch.float32).to(device)
 
-# Initialize the LSTM model
-model = LSTM(input_size=1, hidden_size=127, output_size=5)
+# Initialize the model with the correct input size
+model = LSTM(input_size=4, hidden_size=127, output_size=4, num_layers=2)
+
 # Move the model to the device
 model.to(device)
 
@@ -35,13 +36,13 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # Number of epochs
-epochs = 100000
+epochs = 250000
 
 # Train the model
 for epoch in range(epochs):
     model.train()
     optimizer.zero_grad()
-    output = model(feature_tensor.view(feature_tensor.shape[0], -1, 1))
+    output = model(feature_tensor.view(feature_tensor.shape[0], -1, 4))
     loss = criterion(output, label_tensor)
     loss.backward()
     optimizer.step()
@@ -53,7 +54,7 @@ for epoch in range(epochs):
 model.eval()
 
 # Make predictions
-predictions = model(feature_tensor.view(feature_tensor.shape[0], -1, 1))
+predictions = model(feature_tensor.view(feature_tensor.shape[0], -1, 4))
 
 # Calculate the loss
 loss = criterion(predictions, label_tensor)
@@ -87,4 +88,4 @@ print('Actual labels:\n', (label_tensor.cpu().numpy()))
 
 # Assuming 'model' is your trained model
 print(model.state_dict().keys())
-torch.save(model.state_dict(), 'LSTMTest.pth')
+torch.save(model.state_dict(), 'LSTMTest2.pth')
