@@ -3,5 +3,9 @@ __pycache__/
 flagged/log.csv
 data/**
 .trained_model/**
-midi_files/**
+midi_files/country
+midi_files/pop
+midi_files/rap_hip_hop
+midi_files/rnb_soul
+midi_files/rock
 output.mid
