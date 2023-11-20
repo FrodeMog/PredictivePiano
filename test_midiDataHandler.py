@@ -51,24 +51,6 @@ for _ in range(num_files):
 # Save the data to a CSV file
 data.to_csv("test.csv", index=False)
 
-#TODO
-
-#fix note overflow:
-
-#filename: command_melody_lozww_piano.mid
-#Traceback (most recent call last):
-#  File "C:\Users\Frode\Programming-project\PredictivePiano\test_midiDataHandler.py", line 33, in <module>
-#    pairOfNote = handler.get_pair_of_notes_from_random(file_path, 5)
-#                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#  File "C:\Users\Frode\Programming-project\PredictivePiano\midiDataHandler.py", line 94, in get_pair_of_notes_from_random
-#    raise ValueError("Not enough notes in the MIDI file to select from")
-#ValueError: Not enough notes in the MIDI file to select from
-
-#implement track 1 and track 2. (right and left hand)
-#fix dataset and remove .midi files that arent pure piano
-
-
-
 #print("midi file:", file_path)
 #print("Tempo:", handler.get_tempo(file_path))
 #print("Time signature:", handler.get_time_signature(file_path))
