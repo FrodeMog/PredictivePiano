@@ -57,11 +57,28 @@ class MidiDataHandler:
 
             if channel_number >= len(mid.tracks):
                 raise ValueError("Invalid channel number")
-
+            
+            # construct a note array: [note, velocity, on_tick, duration]
+            # note is the midi note number. 0-127 (88 keys on a piano with odd translation)
+            # velocity is the volume of the note. 0-127
+            # on_tick is the tick when the note was turned on
+            # duration is the number of ticks the note was on for
             notes = []
+            note_on_dict = {}
+            current_tick = 0
             for msg in mid.tracks[channel_number]:
+                current_tick += msg.time
                 if msg.type == 'note_on':
-                    notes.append(msg.note)
+                    # Store the note and the tick when it was turned on
+                    note_on_dict[msg.note] = [msg.note, msg.velocity, current_tick]
+                elif msg.type == 'note_off' and msg.note in note_on_dict:
+                    # Calculate the duration
+                    duration = current_tick - note_on_dict[msg.note][2]
+                    # Append the note, velocity, on_tick and duration to the notes list
+                    notes.append(note_on_dict[msg.note] + [duration])
+                    # Remove the note from the dictionary
+                    del note_on_dict[msg.note]
+
 
             # Ensure there are enough notes to select from
             if start_index + num_notes > len(notes):
@@ -90,8 +107,11 @@ class MidiDataHandler:
             if total_notes <= num_notes:
                 raise ValueError("Not enough notes in the MIDI file to select from")
 
-            # Select a random start index from the first note to the last possible start note
-            start_index = random.randint(0, total_notes - num_notes)
+            # Calculate the maximum possible start index for the pair of arrays
+            max_start_index = total_notes - num_notes - 1
+
+            # Select a random start index within the bounds
+            start_index = random.randint(0, max_start_index)
 
             return self.get_notes_from_index(file_path, start_index, num_notes, channel_number)
 
@@ -119,13 +139,27 @@ class MidiDataHandler:
             raise ValueError("Not enough notes in the MIDI file to select from")
 
         # Calculate the maximum possible start index for the pair of arrays
-        max_start_index = total_notes - 2 * num_notes
+        max_start_index = total_notes - num_notes - 1
 
         # Select a random start index within the bounds
         start_index = random.randint(0, max_start_index)
 
-        return (self.get_notes_from_index(file_path, start_index, num_notes, channel_number),
-                self.get_notes_from_index(file_path, start_index + num_notes, num_notes, channel_number))
+        # Get the notes from the MIDI file
+        notes1 = self.get_notes_from_index(file_path, start_index, num_notes, channel_number)
+        notes2 = self.get_notes_from_index(file_path, start_index + num_notes, num_notes, channel_number)
+
+        # Check if notes1 and notes2 are not None
+        if notes1 is None or notes2 is None:
+             raise ValueError("Not enough notes in the MIDI file to select from")
+
+        # Normalize the 'on_tick' values
+        first_note_on_tick = notes1[0][2]
+        for note in notes1:
+            note[2] -= first_note_on_tick
+        for note in notes2:
+            note[2] -= first_note_on_tick
+
+        return (notes1, notes2)
     
     def dataset_pair(self, file_path, channel_number, num_notes=5):
         """
